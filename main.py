@@ -15,7 +15,7 @@ import re
 import torch
 
 # Import custom modules
-from model_utils import create_model_for_task, extract_model_details
+from model_utils import create_model_for_task, extract_model_details, processed_base_models
 from api_utils import get_base_model, get_model_api_details
 from task_utils import get_task_categories
 from config import setup_logging, FALLBACK_TASKS
@@ -66,9 +66,6 @@ def main():
                 logger.warning(f"No models found for task {task_name}. Skipping.")
                 continue
             
-            # Track unique base models for this task
-            unique_base_models = {}
-            
             # Limit number of models per task based on available resources
             max_models_per_task = min(models_count, 100)  # Adjust as needed
             
@@ -82,19 +79,12 @@ def main():
                     logger.warning(f"Could not determine base model for {model_info.modelId}. Skipping.")
                     continue
                 
-                # Skip if we already have a representative for this base model
-                if base_model_name in unique_base_models:
-                    continue
-                
-                # Save this model as the representative for this base model
-                unique_base_models[base_model_name] = model_info.modelId
-                
-                # Create model and extract architecture
-                logger.info(f"Loading model: {model_info.modelId}")
-                model = create_model_for_task(model_info.modelId, task_id)
+                # Create model and extract architecture - pass base_model_name for tracking
+                logger.info(f"Loading model: {model_info.modelId} (Base: {base_model_name})")
+                model = create_model_for_task(model_info.modelId, task_id, base_model_name)
                 
                 if model is None:
-                    logger.warning(f"Skipping {model_info.modelId} - Could not create model")
+                    logger.info(f"Skipping {model_info.modelId} - Base model already processed or failed to create")
                     continue
                 
                 # Extract architecture details
@@ -167,13 +157,13 @@ def main():
                 # Add small delay to avoid API rate limiting
                 time.sleep(0.5)
                 
-            logger.info(f"Processed {len(unique_base_models)} unique base models for task {task_name}")
+            logger.info(f"Processed {len(processed_base_models)} unique base models for task {task_name}")
             
         except Exception as e:
             logger.error(f"Error processing task {task_name}: {e}")
             continue
     
-    logger.info("Model extraction complete.")
+    logger.info(f"Model extraction complete. Total unique base models across all tasks: {len(processed_base_models)}")
 
 if __name__ == "__main__":
     main() 

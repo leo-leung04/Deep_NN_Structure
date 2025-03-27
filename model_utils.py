@@ -8,9 +8,9 @@ import torch
 import torch.nn as nn
 import logging
 from transformers import (
-    AutoModel, AutoProcessor, AutoTokenizer, 
+    AutoConfig, AutoModel, AutoProcessor, AutoTokenizer, 
     AutoModelForImageClassification, AutoModelForObjectDetection,
-    AutoModelForImageSegmentation, AutoModelForTextClassification,
+    AutoModelForImageSegmentation, AutoModelForSequenceClassification,
     AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForQuestionAnswering,
     AutoModelForMaskedLM, AutoModelForTokenClassification
 )
@@ -18,45 +18,57 @@ from transformers import (
 # Get logger
 logger = logging.getLogger(__name__)
 
+# Global dictionary to track unique base models
+processed_base_models = {}
+
 # -----------------------------
 # Function: Create model for specific task
-def create_model_for_task(model_id, task_type):
-    """Create model instance based on task type"""
+def create_model_for_task(model_id, task_type, base_model_name=None):
+    """Create model instance based on task type without downloading weights"""
+    # Skip if this base model has already been processed
+    if base_model_name is not None and base_model_name in processed_base_models:
+        logger.info(f"Skipping {model_id} - Base model {base_model_name} already processed")
+        return None
+        
+    # Mark this base model as processed if provided
+    if base_model_name is not None:
+        processed_base_models[base_model_name] = model_id
+    
     try:
-        # Use specialized model loaders based on task type
+        # Get model config instead of full model
+        config = AutoConfig.from_pretrained(model_id)
+        
+        # Use specialized model loaders based on task type, but using from_config instead of from_pretrained
         if task_type == "image-classification":
-            return AutoModelForImageClassification.from_pretrained(model_id)
+            return AutoModelForImageClassification.from_config(config)
         elif task_type == "object-detection":
-            return AutoModelForObjectDetection.from_pretrained(model_id)
+            return AutoModelForObjectDetection.from_config(config)
         elif task_type == "image-segmentation":
-            return AutoModelForImageSegmentation.from_pretrained(model_id)
+            return AutoModelForImageSegmentation.from_config(config)
         elif task_type == "text-classification":
-            return AutoModelForTextClassification.from_pretrained(model_id)
+            return AutoModelForSequenceClassification.from_config(config)
         elif task_type == "text-generation":
-            return AutoModelForCausalLM.from_pretrained(model_id)
+            return AutoModelForCausalLM.from_config(config)
         elif task_type in ["translation", "summarization"]:
-            return AutoModelForSeq2SeqLM.from_pretrained(model_id)
+            return AutoModelForSeq2SeqLM.from_config(config)
         elif task_type == "question-answering":
-            return AutoModelForQuestionAnswering.from_pretrained(model_id)
+            return AutoModelForQuestionAnswering.from_config(config)
         elif task_type == "fill-mask":
-            return AutoModelForMaskedLM.from_pretrained(model_id)
+            return AutoModelForMaskedLM.from_config(config)
         elif task_type == "token-classification":
-            return AutoModelForTokenClassification.from_pretrained(model_id)
+            return AutoModelForTokenClassification.from_config(config)
         
         # Multimodal models often need special handling
         elif task_type in ["text-to-image", "image-to-text", "visual-question-answering"]:
             try:
-                # Try to use appropriate processor and model
-                processor = AutoProcessor.from_pretrained(model_id)
-                model = AutoModel.from_pretrained(model_id)
-                return model
+                return AutoModel.from_config(config)
             except Exception as e:
                 logger.warning(f"Failed to load multimodal model: {model_id} - {e}")
                 return None
         
         # Default fallback to AutoModel
         else:
-            return AutoModel.from_pretrained(model_id)
+            return AutoModel.from_config(config)
             
     except Exception as e:
         logger.error(f"Failed to create model {model_id}: {e}")
@@ -95,39 +107,34 @@ def get_dummy_input(model, task_type, model_id):
         if task_shapes[task_type] is not None:
             return torch.randn(task_shapes[task_type])
         else:
-            # For text-based tasks, try to use tokenizer
+            # For text-based tasks, avoid downloading tokenizer by creating dummy inputs
+            if hasattr(model, "config"):
+                # Create dummy inputs based on config
+                seq_length = 16
+                if hasattr(model.config, "max_position_embeddings"):
+                    seq_length = min(16, model.config.max_position_embeddings)
+                batch_size = 1
+                return {"input_ids": torch.randint(100, 200, (batch_size, seq_length))}
+            
+            # Only as last resort, try to get tokenizer
             try:
-                tokenizer = AutoTokenizer.from_pretrained(model_id)
-                inputs = tokenizer("This is a test input for model inference", return_tensors="pt")
+                tokenizer = AutoTokenizer.from_pretrained(model_id, local_files_only=True)
+                inputs = tokenizer("This is a test input", return_tensors="pt")
                 return inputs
             except Exception as e:
                 logger.warning(f"Could not create tokenizer input for {model_id}: {e}")
-                return None
+                # Fallback to generic input
+                return {"input_ids": torch.randint(100, 200, (1, 16))}
     
     # For unknown task types, try to infer from model default config
     if hasattr(model, "config") and hasattr(model.config, "hidden_size"):
-        # This might be a transformer model
-        try:
-            tokenizer = AutoTokenizer.from_pretrained(model_id)
-            inputs = tokenizer("This is a test input for model inference", return_tensors="pt")
-            return inputs
-        except:
-            pass
+        # This might be a transformer model, create dummy inputs
+        return {"input_ids": torch.randint(100, 200, (1, 16))}
     
     # For image models with specified input size
     if hasattr(model, "config") and hasattr(model.config, "image_size"):
         input_size = (1, 3, model.config.image_size, model.config.image_size)
         return torch.randn(input_size)
-    
-    # For multimodal models, try to create processor
-    try:
-        processor = AutoProcessor.from_pretrained(model_id)
-        sample_text = "What does this image show?"
-        sample_image = torch.randn(1, 3, 224, 224)
-        inputs = processor(text=sample_text, images=sample_image, return_tensors="pt")
-        return inputs
-    except:
-        pass
     
     # Try generic default for vision models
     return torch.randn((1, 3, 224, 224))
