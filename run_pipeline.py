@@ -52,7 +52,7 @@ def main():
         ])
     
     if args.all or args.analyze:
-        stages_to_run.append(("cd analysis && python run.py", "Architecture Analysis"))
+        stages_to_run.append(("python model_architecture_analyzer.py", "Architecture Analysis"))
     
     # Run each stage
     for cmd, name in stages_to_run:

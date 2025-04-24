@@ -3,14 +3,14 @@ Main script for analyzing neural network architectures
 """
 
 import os
-from .config import create_output_dirs, OUTPUT_DIR
-from .data_loader import load_csv_files
-from .basic_analysis import (
+from config import create_output_dirs, OUTPUT_DIR
+from data_loader import load_csv_files
+from basic_analysis import (
     analyze_layer_types, analyze_blocks, common_unique_layers,
     compare_layer_distributions, analyze_specialized_components,
     analyze_hierarchy
 )
-from .advanced_analysis import (
+from advanced_analysis import (
     plot_layer_distributions, plot_task_comparison,
     create_architecture_patterns_report, generate_task_summaries,
     export_comparative_data

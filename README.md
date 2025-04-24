@@ -27,13 +27,7 @@ Deep_NN_Structure/
 ├── data_processed/           # Data processing scripts
 │   ├── rename_csv_files.py   # File renaming script
 │   └── deduplication.py      # Deduplication script
-├── analysis/                 # Analysis scripts
-│   ├── config.py             # Analysis configuration
-│   ├── data_loader.py        # Data loading functions
-│   ├── basic_analysis.py     # Basic analysis functions
-│   ├── advanced_analysis.py  # Advanced analysis with visualizations
-│   ├── architecture_analyzer.py # Main analysis logic
-│   └── run.py                # Entry point script
+├── model_architecture_analyzer.py # Main analysis script
 ├── analysis_result/          # Analysis results
 │   ├── images/               # Visualizations and plots
 │   ├── csv_data/             # Processed CSV data
@@ -111,8 +105,7 @@ This will:
 Analyze the processed model architectures:
 
 ```bash
-cd analysis
-python run.py
+python model_architecture_analyzer.py
 ```
 
 This will:
@@ -148,8 +141,8 @@ The complete environment is specified in `deep_nn_structure_env.yml`.
 The project is designed to be customizable:
 
 - **Model Filters**: Adjust `MIN_MODELS_THRESHOLD` in `model_extract/config.py` to control which tasks are processed
-- **Output Directories**: Paths can be configured in the respective config.py files
-- **Visualization Options**: Modify visualization parameters in `analysis/advanced_analysis.py`
+- **Output Directories**: Paths can be configured in the respective config files
+- **Visualization Options**: Modify visualization parameters in `model_architecture_analyzer.py`
 
 ## Acknowledgements
 

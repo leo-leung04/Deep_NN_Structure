@@ -2,7 +2,7 @@
 Entry point for running the architecture analysis
 """
 
-from analysis.architecture_analyzer import main
+from architecture_analyzer import main
 
 if __name__ == "__main__":
     main() 
