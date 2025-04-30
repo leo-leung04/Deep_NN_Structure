@@ -1,0 +1,9 @@
+,Linear,LayerNorm,Dropout,GELUActivation,BlipTextSelfOutput,BlipTextAttention,BlipTextSelfAttention,BlipAttention,BlipEncoderLayer,BlipMLP
+0,339,122,145,48,48,48,48,24,24,24
+1,36,13,19,6,24,24,24,12,12,12
+2,446,175,88,51,10,10,10,5,5,5
+3,73,25,25,12,24,24,24,24,24,24
+4,171,62,73,24,0,0,0,0,0,0
+5,73,27,31,10,0,0,0,0,0,0
+6,219,86,85,36,0,0,0,0,0,0
+7,0,0,0,0,0,0,0,0,0,0

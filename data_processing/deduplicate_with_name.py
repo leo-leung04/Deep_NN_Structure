@@ -22,7 +22,7 @@ def deduplicate_models():
     input_base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
                                 "model_architecture", "raw")
     output_base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                 "model_architecture", "processed")
+                                 "model_architecture", "process_with_name")
     
     # Check if input directory exists
     if not os.path.exists(input_base_dir):

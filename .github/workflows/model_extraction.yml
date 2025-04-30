@@ -1,0 +1,105 @@
+name: Model Structure Extraction Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Pipeline stage to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - extract
+          - process
+          - analyze
+      dedup_strategy:
+        description: 'Deduplication strategy'
+        required: true
+        default: 'name'
+        type: choice
+        options:
+          - name
+          - architecture
+          - both
+      similarity_threshold:
+        description: 'Similarity threshold for architecture-based deduplication'
+        required: false
+        default: '0.85'
+        type: string
+
+jobs:
+  run_pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install torch pandas numpy matplotlib seaborn transformers huggingface_hub; fi
+      
+      - name: Run pipeline
+        env:
+          # Pass GitHub repository variables to the pipeline
+          MODEL_EXTRACT_OUTPUT_DIR: ${{ vars.MODEL_EXTRACT_OUTPUT_DIR || 'model_architecture/raw' }}
+          MODEL_EXTRACT_SLEEP_TIME: ${{ vars.MODEL_EXTRACT_SLEEP_TIME || '1.0' }}
+          MODEL_EXTRACT_MIN_MODELS: ${{ vars.MODEL_EXTRACT_MIN_MODELS || '300' }}
+          MODEL_EXTRACT_COMPLETED_TASKS: ${{ vars.MODEL_EXTRACT_COMPLETED_TASKS || '' }}
+          # You can add more configuration variables here
+        run: |
+          echo "Running pipeline with the following configuration:"
+          echo "Output directory: $MODEL_EXTRACT_OUTPUT_DIR"
+          echo "Sleep time: $MODEL_EXTRACT_SLEEP_TIME"
+          echo "Minimum models threshold: $MODEL_EXTRACT_MIN_MODELS"
+          echo "Completed tasks: $MODEL_EXTRACT_COMPLETED_TASKS"
+          echo "Deduplication strategy: ${{ github.event.inputs.dedup_strategy }}"
+          echo "Similarity threshold: ${{ github.event.inputs.similarity_threshold }}"
+
+          # Run the appropriate stage of the pipeline
+          if [ "${{ github.event.inputs.stage }}" = "extract" ] || [ "${{ github.event.inputs.stage }}" = "all" ]; then
+            echo "Running extraction stage..."
+            python -m model_extract.run
+          fi
+
+          if [ "${{ github.event.inputs.stage }}" = "process" ] || [ "${{ github.event.inputs.stage }}" = "all" ]; then
+            echo "Running processing stage..."
+            cd data_processing && python rename_csv_files.py
+            
+            if [ "${{ github.event.inputs.dedup_strategy }}" = "name" ] || [ "${{ github.event.inputs.dedup_strategy }}" = "both" ]; then
+              python deduplication_runner.py --strategy name
+            fi
+            
+            if [ "${{ github.event.inputs.dedup_strategy }}" = "architecture" ] || [ "${{ github.event.inputs.dedup_strategy }}" = "both" ]; then
+              python deduplication_runner.py --strategy architecture --similarity-threshold ${{ github.event.inputs.similarity_threshold }}
+            fi
+          fi
+
+          if [ "${{ github.event.inputs.stage }}" = "analyze" ] || [ "${{ github.event.inputs.stage }}" = "all" ]; then
+            echo "Running analysis stage..."
+            if [ "${{ github.event.inputs.dedup_strategy }}" = "name" ]; then
+              python model_architecture_analyzer.py --input_dir model_architecture/process_with_name
+            elif [ "${{ github.event.inputs.dedup_strategy }}" = "architecture" ]; then
+              python model_architecture_analyzer.py --input_dir model_architecture/process_with_architecture
+            else
+              python model_architecture_analyzer.py --input_dir model_architecture/process_with_name
+            fi
+          fi
+      
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: analysis-results
+          path: |
+            analysis_result/
+            model_architecture/process_with_name/
+            model_architecture/process_with_architecture/
+          retention-days: 7 

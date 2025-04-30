@@ -1,0 +1,128 @@
+Common Functional Blocks by Task
+
+feature-extraction:
+  embeddings: found in 38 models
+  encoder: found in 45 models
+  pooler: found in 23 models
+  bert: found in 3 models
+  layers: found in 2 models
+  layers_0: found in 2 models
+  layers_1: found in 2 models
+  layers_10: found in 2 models
+  layers_11: found in 2 models
+  layers_12: found in 2 models
+  layers_13: found in 2 models
+  layers_14: found in 2 models
+  layers_15: found in 2 models
+  layers_16: found in 2 models
+  layers_17: found in 2 models
+  layers_18: found in 2 models
+  layers_19: found in 2 models
+  layers_2: found in 2 models
+  layers_20: found in 2 models
+  layers_21: found in 2 models
+  layers_3: found in 2 models
+  layers_4: found in 2 models
+  layers_5: found in 2 models
+  layers_6: found in 2 models
+  layers_7: found in 2 models
+  layers_8: found in 2 models
+  layers_9: found in 2 models
+  h: found in 4 models
+  decoder: found in 3 models
+  attentions: found in 2 models
+  ffns: found in 2 models
+  layer_norm1: found in 2 models
+  layer_norm2: found in 2 models
+
+image-text-to-text:
+  encoder: found in 8 models
+  text_model: found in 4 models
+  vision_model: found in 5 models
+  embeddings: found in 2 models
+
+audio-classification:
+  conv_layers: found in 19 models
+  conv_layers_0: found in 19 models
+  conv_layers_1: found in 19 models
+  conv_layers_2: found in 18 models
+  conv_layers_3: found in 18 models
+  conv_layers_4: found in 18 models
+  conv_layers_5: found in 18 models
+  conv_layers_6: found in 18 models
+  encoder: found in 26 models
+  feature_projection: found in 18 models
+  embeddings: found in 4 models
+  decoder: found in 3 models
+
+automatic-speech-recognition:
+  decoder: found in 7 models
+  encoder: found in 16 models
+  conv_layers: found in 8 models
+  conv_layers_0: found in 8 models
+  conv_layers_1: found in 8 models
+  conv_layers_2: found in 8 models
+  conv_layers_3: found in 7 models
+  conv_layers_4: found in 7 models
+  conv_layers_5: found in 7 models
+  conv_layers_6: found in 7 models
+  feature_projection: found in 8 models
+
+image-feature-extraction:
+  embeddings: found in 4 models
+  encoder: found in 3 models
+  pooler: found in 2 models
+
+image-segmentation:
+  conv_stem: found in 3 models
+  encoder: found in 18 models
+  decoder: found in 5 models
+  pixel_level_module: found in 5 models
+  transformer_module: found in 5 models
+  model: found in 3 models
+  embeddings: found in 5 models
+  pooler: found in 4 models
+
+fill-mask:
+  bert: found in 38 models
+  cls: found in 43 models
+  encoder: found in 78 models
+  lm_head: found in 31 models
+  roberta: found in 25 models
+  longformer: found in 3 models
+  decoder: found in 2 models
+  model: found in 4 models
+  luke: found in 2 models
+  layers: found in 2 models
+  layers_0: found in 2 models
+  layers_1: found in 2 models
+  layers_10: found in 2 models
+  layers_11: found in 2 models
+  layers_12: found in 2 models
+  layers_13: found in 2 models
+  layers_14: found in 2 models
+  layers_15: found in 2 models
+  layers_16: found in 2 models
+  layers_17: found in 2 models
+  layers_18: found in 2 models
+  layers_19: found in 2 models
+  layers_2: found in 2 models
+  layers_20: found in 2 models
+  layers_21: found in 2 models
+  layers_3: found in 2 models
+  layers_4: found in 2 models
+  layers_5: found in 2 models
+  layers_6: found in 2 models
+  layers_7: found in 2 models
+  layers_8: found in 2 models
+  layers_9: found in 2 models
+  deberta: found in 3 models
+  distilbert: found in 3 models
+  layer: found in 3 models
+  layer_0: found in 3 models
+  layer_1: found in 3 models
+  layer_2: found in 3 models
+  layer_3: found in 2 models
+  layer_4: found in 2 models
+  layer_5: found in 2 models
+

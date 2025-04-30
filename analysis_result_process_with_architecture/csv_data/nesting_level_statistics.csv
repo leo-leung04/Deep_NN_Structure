@@ -1,0 +1,8 @@
+Task,Median_Nesting_Level,Mean_Nesting_Level
+audio-classification,4.0,3.514310002833664
+automatic-speech-recognition,4.0,3.465814998817128
+feature-extraction,4.0,3.974817348049122
+fill-mask,5.0,4.787716885315278
+image-feature-extraction,3.0,3.238751147842057
+image-segmentation,5.0,5.110977080820265
+image-text-to-text,5.0,4.783541553503531
